@@ -1,4 +1,4 @@
-# ✨ Gemini Flash Notebook
+# ✨ Wilshen Flash Notebook
 
 A playful AI web app that lets you chat with **Wilshen AI** using a handwritten notebook-inspired interface!  
 Write a message, hit **"Create"**, and watch AI respond like magic.
