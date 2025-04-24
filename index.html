@@ -1,104 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Gemini Flash Notebook</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     * {
-      outline:none;
-      border:none;
-      margin:0px;
-      padding:0px;
-      font-family:Courier, monospace;
+      box-sizing: border-box;
+      outline: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+      font-family: Courier, monospace;
     }
     body {
-      background:#333 url(https://static.tumblr.com/maopbtg/a5emgtoju/inflicted.png) repeat;
+      background: #333 url(https://static.tumblr.com/maopbtg/a5emgtoju/inflicted.png) repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
     }
-    #paper {
-      color:#FFF;
-      font-size:20px;
-    }
-    #margin {
-      margin-left:12px;
-      margin-bottom:20px;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      -o-user-select: none;
-      user-select: none;
-    }
-    #text {
-      width:500px;
-      overflow:hidden;
-      background-color:#FFF;
-      color:#222;
-      font-family:Courier, monospace;
-      font-weight:normal;
-      font-size:24px;
-      resize:none;
-      line-height:40px;
-      padding-left:100px;
-      padding-right:100px;
-      padding-top:45px;
-      padding-bottom:34px;
-      background-image:url(https://static.tumblr.com/maopbtg/E9Bmgtoht/lines.png), url(https://static.tumblr.com/maopbtg/nBUmgtogx/paper.png);
-      background-repeat:repeat-y, repeat;
-      -webkit-border-radius:12px;
-      border-radius:12px;
-      -webkit-box-shadow: 0px 2px 14px #000;
-      box-shadow: 0px 2px 14px #000;
-      border-top:1px solid #FFF;
-      border-bottom:1px solid #FFF;
-    }
-    #title {
-      background-color:transparent;
-      border-bottom:3px solid #FFF;
-      color:#FFF;
-      font-size:20px;
-      font-family:Courier, monospace;
-      height:28px;
-      font-weight:bold;
-      width:240px;
-    }
-    #button {
-      cursor:pointer;
-      margin-top:20px;
-      float:right;
-      height:40px;
-      padding-left:24px;
-      padding-right:24px;
-      font-family:Arial, Helvetica, sans-serif;
-      font-weight:bold;
-      font-size:20px;
-      color:#FFF;
-      text-shadow: 0px -1px 0px #000000;
-      -webkit-border-radius:8px;
-      border-radius:8px;
-      border-top:1px solid #FFF;
-      -webkit-box-shadow: 0px 2px 14px #000;
-      box-shadow: 0px 2px 14px #000;
-      background-color: #62add6;
-      background-image:url(https://static.tumblr.com/maopbtg/ZHLmgtok7/button.png);
-      background-repeat:repeat-x;
-    }
-    #button:active,
-    #button:focus {
-      zoom: 1;
-      filter: alpha(opacity=80);
-      opacity: 0.8;
-    }
+
     #wrapper {
-      width:700px;
-      height:auto;
-      margin-left:auto;
-      margin-right:auto;
-      margin-top:24px;
-      margin-bottom:100px;
+      width: 100%;
+      max-width: 600px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 14px #000;
     }
-    #response {
-      margin-top: 91px;
+
+    #paper {
+      color: #FFF;
+      font-size: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #margin {
+      margin-bottom: 20px;
       color: #fff;
-      font-family: Courier, monospace;
+    }
+
+    #title {
+      background-color: transparent;
+      border-bottom: 3px solid #FFF;
+      color: #FFF;
+      font-size: 18px;
+      height: 28px;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    #text {
+      width: 100%;
+      background-color: #FFF;
+      color: #222;
+      font-size: 18px;
+      resize: none;
+      line-height: 30px;
+      padding: 20px;
+      background-image: url(https://static.tumblr.com/maopbtg/E9Bmgtoht/lines.png),
+                        url(https://static.tumblr.com/maopbtg/nBUmgtogx/paper.png);
+      background-repeat: repeat-y, repeat;
+      border-radius: 12px;
+      box-shadow: 0 2px 14px #000;
+      margin-top: 10px;
+    }
+
+    #button {
+      margin-top: 20px;
+      height: 45px;
+      background-color: #62add6;
+      background-image: url(https://static.tumblr.com/maopbtg/ZHLmgtok7/button.png);
+      background-repeat: repeat-x;
+      color: #FFF;
+      font-weight: bold;
+      font-size: 20px;
+      border-radius: 8px;
+      text-shadow: 0px -1px 0px #000000;
+      box-shadow: 0px 2px 14px #000;
+      cursor: pointer;
+    }
+
+    #response {
+      margin-top: 40px;
+      color: #fff;
       white-space: pre-wrap;
       background-color: rgba(0, 0, 0, 0.4);
       padding: 20px;
@@ -113,29 +103,28 @@
     <form id="paper">
       <div id="margin">Title: <input id="title" disabled type="text" value="Chat With Wilshen AI" name="title"></div>
       <textarea placeholder="Enter something funny." id="text" name="text" rows="4"></textarea>
-      <br>
       <input id="button" type="submit" value="Create">
     </form>
-
     <div id="response"></div>
   </div>
 
   <script>
     document.getElementById("paper").addEventListener("submit", async function(event) {
       event.preventDefault();
-
       const userInput = document.getElementById("text").value;
       const responseBox = document.getElementById("response");
       responseBox.textContent = "Loading...";
-      const batasan = "Gwapa, Utokan, Palangga si Jesus, Limtanon, Danghag, Maayo mo picture, Ganahan mag exercise, Ganahan mag basa, Maayo maminaw, Buotan, Ganahan maglantaw og salida, Ganahan mag suroy suroy, Lihokan, Laagan, Kusog mukaon, Oa, Tapulan, Ganahan og fashion, Mahigugmaon nga anak og igsoon, Gastador";
 
+      const batasan = "Gwapa, Utokan, Palangga si Jesus, Limtanon, Danghag, Maayo mo picture, Ganahan mag exercise, Ganahan mag basa, Maayo maminaw, Buotan, Ganahan maglantaw og salida, Ganahan mag suroy suroy, Lihokan, Laagan, Kusog mukaon, Oa, Tapulan, Ganahan og fashion, Mahigugmaon nga anak og igsoon, Gastador";
 
       const apiKey = "AIzaSyDDVWuPI3xt8fmlTIeaYl9FC4dx-F9n484";
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
       const payload = {
         contents: [{
-          parts: [{ text: 'Remember your name is Wilshen and your Full name is Wilshen Maravillas You are born on July 21, 2009. You must response or speak only in Bisaya. Please answer this : " ' + userInput + ' ". Also do not forget that these are your attitude most of it are written in bisaya : ' + batasan + 'Take note do not response about the message that are not inside the "" just remember it and dont say anything about'}]
+          parts: [{
+            text: 'Remember your name is Wilshen and your Full name is Wilshen Maravillas. You are born on July 21, 2009. You must response or speak only in Bisaya. Please answer this: "' + userInput + '". Also do not forget that these are your attitude most of it are written in bisaya: ' + batasan + '. Take note: do not respond about the message that is not inside the "" — just remember it and don\'t say anything about it.'
+          }]
         }]
       };
 
