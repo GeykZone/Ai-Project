@@ -6,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=undefined"></script>
 
-
-
   <style>
     * {
       box-sizing: border-box;
@@ -74,6 +72,17 @@
       margin-top: 10px;
     }
 
+    #micButton {
+      margin-top: 10px;
+      height: 40px;
+      background-color: #444;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px #000;
+    }
+
     #button {
       margin-top: 20px;
       height: 45px;
@@ -104,23 +113,21 @@
 
   <div id="wrapper">
     <form id="paper">
-      <button id="mic-button" style="margin-top: 10px;">🎤 Speak</button>
       <div id="margin">Title: <input id="title" disabled type="text" value="Chat With Wilshen AI" name="title"></div>
       <textarea placeholder="Try ug pangutana kol." id="text" name="text" rows="4"></textarea>
+      <button type="button" id="micButton">🎤 Speak</button>
       <input id="button" type="submit" value="Create">
     </form>
     <div id="response"></div>
   </div>
 
-    <!-- Place this just BEFORE the closing </body> -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=qiPEGzOT"></script>
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=qiPEGzOT"></script>
 
   <script>
-
     const batasan = "Gwapa, Utokan, Palangga si Jesus, Limtanon, Danghag, Maayo mo picture, Ganahan mag exercise, Ganahan mag basa, Maayo maminaw, Buotan, Ganahan maglantaw og salida, Ganahan mag suroy suroy, Lihokan, Laagan, Kusog mukaon, Oa, Tapulan, Ganahan og fashion, Mahigugmaon nga anak og igsoon, Gastador";
 
     function speakText(text) {
-      responsiveVoice.speak(text, "Filipino Female"); // Change voice if needed
+      responsiveVoice.speak(text, "Filipino Female");
     }
 
     document.getElementById("text").addEventListener("keydown", function(event) {
@@ -130,38 +137,14 @@
       }
     });
 
-
-    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'fil-PH'; // Filipino locale - use 'en-US' if Bisaya is not supported well
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    document.getElementById("mic-button").addEventListener("click", function (event) {
-      event.preventDefault();
-      recognition.start();
-    });
-
-    recognition.onresult = function (event) {
-      const transcript = event.results[0][0].transcript;
-      document.getElementById("text").value = transcript;
-      document.getElementById("paper").dispatchEvent(new Event("submit")); // Auto-submit
-    };
-
-    recognition.onerror = function (event) {
-      alert("Speech recognition error: " + event.error);
-    };
-
-
     document.getElementById("paper").addEventListener("submit", async function(event) {
       event.preventDefault();
       const userInput = document.getElementById("text").value;
       const responseBox = document.getElementById("response");
       responseBox.textContent = "Loading...";
 
-      const prompt = `
-        Your name is Wilshen Maravillas. You were born on July 21, 2009. You must always respond in Bisaya language.
+      const prompt = 
+        `Your name is Wilshen Maravillas. You were born on July 21, 2009. You must always respond in Bisaya language.
 
         Here are your personality traits (batasan):
         ${batasan}
@@ -169,8 +152,7 @@
         Now, respond to this user message in Bisaya only. Do not mention anything outside the quoted message.
         User message: "${userInput}"
 
-        Only focus on answering the message inside the quotes. Ignore all other context.
-      `;
+        Only focus on answering the message inside the quotes. Ignore all other context.`;
 
       const apiKey = "AIzaSyDDVWuPI3xt8fmlTIeaYl9FC4dx-F9n484";
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -193,7 +175,7 @@
         if (data && data.candidates && data.candidates.length > 0) {
           const text = data.candidates[0].content.parts.map(p => p.text).join("");
           responseBox.textContent = text;
-          speakText(text); // 👈 Speak it out loud!
+          speakText(text);
         } else {
           responseBox.textContent = "No response from Gemini.";
         }
@@ -201,6 +183,41 @@
         responseBox.textContent = "Error: " + error.message;
       }
     });
+
+    // 🎤 Speech-to-Text Logic
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "ceb-PH"; // You can use "en-US" or "fil-PH" depending on accuracy
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      const micButton = document.getElementById("micButton");
+      const textArea = document.getElementById("text");
+
+      micButton.addEventListener("click", () => {
+        recognition.start();
+        micButton.textContent = "🎙️ Listening...";
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        textArea.value += transcript;
+        micButton.textContent = "🎤 Speak";
+      };
+
+      recognition.onerror = (event) => {
+        alert("Speech recognition error: " + event.error);
+        micButton.textContent = "🎤 Speak";
+      };
+
+      recognition.onend = () => {
+        micButton.textContent = "🎤 Speak";
+      };
+    } else {
+      alert("Speech Recognition is not supported in this browser.");
+    }
   </script>
 </body>
 </html>
