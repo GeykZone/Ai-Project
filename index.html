@@ -116,7 +116,7 @@
       <div id="margin">Title: <input id="title" disabled type="text" value="Chat With Wilshen AI" name="title"></div>
       <textarea placeholder="Try ug pangutana kol." id="text" name="text" rows="4"></textarea>
       <button type="button" id="micButton">🎤 Speak</button>
-      <input id="button" type="submit" value="Create">
+      <input id="button" type="submit" value="Send">
     </form>
     <div id="response"></div>
   </div>
@@ -189,7 +189,7 @@
 
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
-      recognition.lang = "ceb-PH"; // You can use "en-US" or "fil-PH" depending on accuracy
+      recognition.lang = "fil-PH"; // You can use "en-US" or "fil-PH" depending on accuracy
       recognition.continuous = false;
       recognition.interimResults = false;
 
