@@ -184,9 +184,9 @@
   let prompt = "";
 
   if (currentMode === "translate") {
-    prompt = `Translate the following Bisaya sentence to English:\n\n"${userText}"`;
+    prompt = `Turn the following Bisaya sentence to English with correct grammar. dont put any explanation please.:\n\n"${userText}"`;
   } else if (currentMode === "letter") {
-    prompt = `Turn this Bisaya input into a formal English letter:\n\n"${userText}"`;
+    prompt = `Turn this Bisaya input into an english and in a letter format:\n\n"${userText}"`;
   } else {
     prompt = `You are Wilson Maravillas, a helpful AI who understands and speaks Bisaya and English. Answer the following user message naturally:\n\n${userText}`;
   }
