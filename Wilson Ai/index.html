@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Viewport meta tag for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wilson Maravillas AI</title>
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🤖</text></svg>">
@@ -29,6 +29,13 @@
     h2 {
       text-align: center;
       color: #f1f1f1;
+      margin-bottom: 10px;
+    }
+
+    .top-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
 
     .mode-buttons {
@@ -37,7 +44,24 @@
       margin-bottom: 20px;
     }
 
-    .mode-buttons button {
+
+    .refresh-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.refresh-btn {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+
+    .mode-buttons button, .top-buttons button {
       margin: 5px;
       padding: 10px 20px;
       border: none;
@@ -50,6 +74,10 @@
 
     .mode-buttons button.active {
       background: #4CAF50;
+    }
+
+    .top-buttons button.refresh-btn {
+      background-color: #1a73e8;
     }
 
     #messages {
@@ -87,7 +115,6 @@
       color: #f1f1f1;
     }
 
-    /* Flexbox layout for input and button */
     .input-container {
       display: flex;
       justify-content:space-evenly;
@@ -102,32 +129,30 @@
       color: white;
       border: none;
       cursor: pointer;
-      flex-shrink: 0; /* Prevents the button from shrinking */
+      flex-shrink: 0;
       align-self:self-end;
       margin-bottom: 2px;
     }
 
-    /* Responsive Design */
     @media (max-width: 768px) {
       .mode-buttons {
         flex-direction: column;
         align-items: center;
       }
 
-      /* Ensure input and button are aligned in mobile view */
       .input-container {
         width: 100%;
-        flex-direction: column; /* Stack input and button vertically */
-        align-items: stretch; /* Stretch both elements to the full width */
+        flex-direction: column;
+        align-items: stretch;
       }
 
       input[type="text"] {
         width: unset;
-        margin-bottom: 10px; /* Add space between input and button */
+        margin-bottom: 10px;
       }
 
       button.send-btn {
-        width: 100%; /* Make the button full-width */
+        width: 100%;
       }
     }
   </style>
@@ -135,13 +160,18 @@
 <body>
   <div class="chat-box">
     <h2>Wilson Maravillas AI 🤖</h2>
+<div class="refresh-container">
+  <button class="refresh-btn" onclick="manualRefresh()">🔄 Refresh</button>
+</div>
+
     <div class="mode-buttons">
-      <button onclick="setMode('translate')" id="btn-translate">Translate Bisaya ➡️ English</button>
-      <button onclick="setMode('letter')" id="btn-letter">Letter Format (Bisaya ➡️ English)</button>
-      <button onclick="setMode('ask')" class="active" id="btn-ask">Ask Anything</button>
+      <button onclick="selectMode('translate')" id="btn-translate">Translate Bisaya ➡️ English</button>
+      <button onclick="selectMode('letter')" id="btn-letter">Letter Format (Bisaya ➡️ English)</button>
+      <button onclick="selectMode('ask')" id="btn-ask">Ask Anything</button>
     </div>
+
     <div id="messages"></div>
-    <!-- Input container with flexbox layout -->
+
     <div class="input-container">
       <input type="text" id="user-input" placeholder="Type your message..." />
       <button onclick="sendMessage()" class="send-btn">Send</button>
@@ -149,20 +179,29 @@
   </div>
 
   <script>
-    const API_KEY = "AIzaSyBG9CeTRKJZA5fzcxdfzno5WaJPacW7bTA";
     const messagesDiv = document.getElementById('messages');
-    let currentMode = "ask"; // default mode
+    let currentMode = localStorage.getItem('mode') || 'ask'; // Load mode from storage
 
-    function setMode(mode) {
-      currentMode = mode;
-      document.querySelectorAll('.mode-buttons button').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('btn-' + mode).classList.add('active');
+    function manualRefresh() {
+      location.reload();
     }
+
+    function selectMode(mode) {
+      localStorage.setItem('mode', mode); // Save the selected mode
+      location.reload(); // Refresh the page
+    }
+
+    function highlightActiveButton() {
+      document.querySelectorAll('.mode-buttons button').forEach(btn => btn.classList.remove('active'));
+      const btn = document.getElementById('btn-' + currentMode);
+      if (btn) btn.classList.add('active');
+    }
+
+    highlightActiveButton(); // Call this on page load to highlight the correct button
 
     function appendMessage(role, text) {
       const msg = document.createElement('div');
       msg.className = 'message ' + role;
-      // Format the response to improve readability
       const formattedText = formatResponse(text);
       msg.innerHTML = `<span class="${role}">${role === 'user' ? 'You' : 'Wilson AI'}:</span> ${formattedText}`;
       messagesDiv.appendChild(msg);
@@ -170,63 +209,58 @@
     }
 
     function formatResponse(text) {
-      // Replace newlines with breaks for better visual formatting
       return text.replace(/\n/g, '<br>').replace(/(?:^|\n)(\s+)/g, '<br>&nbsp;&nbsp;&nbsp;&nbsp;');
     }
 
     async function sendMessage() {
-  const input = document.getElementById('user-input');
-  const userText = input.value.trim();
-  if (!userText) return;
-  appendMessage('user', userText);
-  input.value = '';
+      const input = document.getElementById('user-input');
+      const userText = input.value.trim();
+      if (!userText) return;
+      appendMessage('user', userText);
+      input.value = '';
 
-  let prompt = "";
+      let prompt = "";
 
-  if (currentMode === "translate") {
-    prompt = `Turn the following Bisaya sentence to English with correct grammar. dont put any explanation please.:\n\n"${userText}"`;
-  } else if (currentMode === "letter") {
-    prompt = `Turn this Bisaya input into an english and in a letter format:\n\n"${userText}"`;
-  } else {
-    prompt = `You are Wilson Maravillas, a helpful AI who understands and speaks Bisaya and English. Answer the following user message naturally:\n\n${userText}`;
-  }
+      if (currentMode === "translate") {
+        prompt = `Turn the following Bisaya sentence to English with correct grammar. don't put any explanation please.:\n\n"${userText}"`;
+      } else if (currentMode === "letter") {
+        prompt = `Turn this Bisaya input into an english and in a letter format:\n\n"${userText}"`;
+      } else {
+        prompt = `You are Wilson Maravillas, a helpful AI who understands and speaks Bisaya and English. Answer the following user message naturally:\n\n${userText}`;
+      }
 
-  // Show loading message
-  const loadingMsg = document.createElement('div');
-  loadingMsg.className = 'message ai';
-  loadingMsg.id = 'loading-message';
-  loadingMsg.innerHTML = `<span class="ai">Wilson:</span> <em>Typing...</em>`;
-  messagesDiv.appendChild(loadingMsg);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'message ai';
+      loadingMsg.id = 'loading-message';
+      loadingMsg.innerHTML = `<span class="ai">Wilson:</span> <em>Typing...</em>`;
+      messagesDiv.appendChild(loadingMsg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-  try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          { parts: [ { text: prompt } ] }
-        ]
-      })
-    });
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBG9CeTRKJZA5fzcxdfzno5WaJPacW7bTA`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              { parts: [ { text: prompt } ] }
+            ]
+          })
+        });
 
-    const data = await res.json();
-    const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
+        const data = await res.json();
+        const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
 
-    // Remove loading message
-    const loadingEl = document.getElementById('loading-message');
-    if (loadingEl) loadingEl.remove();
+        const loadingEl = document.getElementById('loading-message');
+        if (loadingEl) loadingEl.remove();
 
-    // Show actual response
-    appendMessage('ai', aiText);
-  } catch (err) {
-    console.error(err);
-    const loadingEl = document.getElementById('loading-message');
-    if (loadingEl) loadingEl.remove();
-    appendMessage('ai', "⚠️ Error connecting to Wilson.");
-  }
-}
-
+        appendMessage('ai', aiText);
+      } catch (err) {
+        console.error(err);
+        const loadingEl = document.getElementById('loading-message');
+        if (loadingEl) loadingEl.remove();
+        appendMessage('ai', "⚠️ Error connecting to Wilson.");
+      }
+    }
   </script>
 </body>
 </html>
