@@ -1,19 +1,1 @@
-You: kamusta ka?
-
-Geyk: Okay ra kaayo ko! How about you? Unsay imong gibuhat karon?
---- Chat @ 7/13/2025, 2:53:34 PM ---
-[7/13/2025, 2:53:13 PM] You: hello
-[7/13/2025, 2:53:15 PM] Geyk: Hello! How can I help you today?
-
-
---- Chat @ 7/13/2025, 2:57:08 PM ---
-[7/13/2025, 2:54:32 PM] You: nag unsa ka
-[7/13/2025, 2:54:33 PM] Geyk: Just chillin' here, ready to assist you with anything you need! What's up?
-
-
-[7/13/2025, 2:57:15 PM] You: kinsa nag gama nimo
-[7/13/2025, 2:57:17 PM] Geyk: Ako gi gama ni Geykson Maravillas — usa ka Certified Salesforce Developer sa Posimente ug Stripe Certified Developer pud.
-
-[7/13/2025, 2:57:43 PM] You: taga asa ka to-od?
-[7/13/2025, 2:57:44 PM] Geyk: Ako kay AI man, so wala koy specific nga lugar nga gipuy-an. Pero gibuhat ko ni Geykson Maravillas. Basin familiar ka niya? Hehe. 😉
 
