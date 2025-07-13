@@ -1,37 +1,28 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
-// Middleware to parse JSON requests
-app.use(express.json());
+app.use(express.static('.'));
+app.use('/save-chat', express.text());
 
-// Serve static files from the current directory (index.html, etc.)
-app.use(express.static(__dirname));
-
-// API endpoint to save chat logs
 app.post('/save-chat', (req, res) => {
-  const content = req.body?.log || '';
-  const logEntry = `\n\n${new Date().toLocaleString()} ---\n${content}\n`;
-
-  fs.appendFile(path.join(__dirname, 'convo.txt'), logEntry, err => {
+  const entry = req.body;
+  fs.appendFile('convo.txt', entry, (err) => {
     if (err) {
-      console.error('❌ Failed to save chat:', err);
-      return res.status(500).send('Error saving chat');
+      console.error('❌ Failed to save:', err);
+      return res.sendStatus(500);
     }
-    console.log(`✅ Chat saved: ${content}`);
-    res.status(200).send('Saved');
+    console.log('✅ Chat saved:', entry.trim());
+    res.sendStatus(200);
   });
 });
 
-// Optional endpoint to read the full convo file (publicly viewable)
 app.get('/convo.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'convo.txt'));
 });
 
-// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🟢 Listening at http://localhost:${PORT}`);
 });
