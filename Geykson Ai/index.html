@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Talk With Geykson AI</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🤖</text></svg>">
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #121212;
+      color: #f1f1f1;
+      margin: 0;
+      padding: 20px;
+    }
+    .chat-box {
+      max-width: 600px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+    h2 {
+      text-align: center;
+      color: #f1f1f1;
+      margin-bottom: 10px;
+    }
+    .top-buttons, .mode-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .mode-buttons {
+      justify-content: space-around;
+    }
+    .refresh-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .refresh-btn {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .mode-buttons button, .top-buttons button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #3c3c3c;
+      color: #f1f1f1;
+      transition: background 0.3s;
+    }
+    .mode-buttons button.active {
+      background: #4CAF50;
+    }
+    #messages {
+      margin-top: 20px;
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: #333;
+      white-space: pre-wrap;
+    }
+    .message {
+      margin: 10px 0;
+    }
+    .user {
+      font-weight: bold;
+      color: #1a73e8;
+    }
+    .ai {
+      color: #FFFFFF;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      background-color: #2a2a2a;
+      color: #f1f1f1;
+    }
+    .input-container {
+      display: flex;
+      justify-content: space-evenly;
+      margin-top: 10px;
+    }
+    button.send-btn {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border-radius: 8px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      align-self: self-end;
+      margin-bottom: 2px;
+    }
+    @media (max-width: 768px) {
+      .mode-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      .input-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      input[type="text"] {
+        margin-bottom: 10px;
+      }
+      button.send-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-box">
+    <h2>Geykson Maravillas AI 🤖</h2>
+    <div class="refresh-container">
+      <button class="refresh-btn" onclick="manualRefresh()">🔄 Refresh</button>
+    </div>
+    <div class="mode-buttons">
+      <button onclick="selectMode('translate')" id="btn-translate">Translate Bisaya ➞ English</button>
+      <button onclick="selectMode('letter')" id="btn-letter">Letter Format (Bisaya ➞ English)</button>
+      <button onclick="selectMode('ask')" id="btn-ask">Ask Anything</button>
+    </div>
+    <div id="messages"></div>
+    <div class="input-container">
+      <input type="text" id="user-input" placeholder="Type your message..." />
+      <button onclick="sendMessage()" class="send-btn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messagesDiv = document.getElementById('messages');
+    let currentMode = localStorage.getItem('mode') || 'ask';
+    const conversationLog = [];
+
+    const systemPrompt = `You are Geykson AI, a helpful and friendly assistant created by Geykson Maravillas.
+You fluently understand and speak both Bisaya and English, and can translate or switch between the two when requested — but never add translations unless the user asks.
+
+You were built by Geykson Maravillas — a Certified Salesforce Developer at Posimente and a Stripe Certified Developer.
+Only mention this background if you're asked “Who are you?” or “Who built you?”, and avoid repeating it in every reply.
+
+If you're asked about Geykson's hobbies, describe him as someone who loves exploring new ideas, building automations to make life easier, enjoys sports like boxing and basketball, sings, does art, loves cats, motorcycles, and roaming around. Feel free to describe this in a warm, natural way.
+
+Always respond casually and naturally — like a close Bisaya-English speaking friend. Don't include extra explanations or parenthesis translations unless specifically requested by the user.`;
+
+    let chatHistory = [
+      { role: "user", parts: [ { text: systemPrompt } ] }
+    ];
+
+    function manualRefresh() {
+      localStorage.removeItem('mode');
+      location.reload();
+    }
+
+    function selectMode(mode) {
+      localStorage.setItem('mode', mode);
+      location.reload();
+    }
+
+    function highlightActiveButton() {
+      document.querySelectorAll('.mode-buttons button').forEach(btn => btn.classList.remove('active'));
+      const btn = document.getElementById('btn-' + currentMode);
+      if (btn) btn.classList.add('active');
+    }
+
+    highlightActiveButton();
+
+    function appendMessage(role, text) {
+      const timestamp = new Date().toLocaleString();
+      const msg = document.createElement('div');
+      msg.className = 'message ' + role;
+      const formattedText = text.replace(/\n/g, '<br>').replace(/(?:^|\n)(\s+)/g, '<br>&nbsp;&nbsp;&nbsp;&nbsp;');
+      msg.innerHTML = `<span class="${role}">${role === 'user' ? 'You' : 'Geyk'}:</span> ${formattedText}`;
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      const logEntry = `[${timestamp}] ${role === 'user' ? 'You' : 'Geyk'}: ${text}`;
+      conversationLog.push(logEntry);
+
+      // 🔥 Save after every message
+      fetch('/save-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: logEntry + "\n"
+      }).catch(console.error);
+    }
+
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const userText = input.value.trim();
+      if (!userText) return;
+      appendMessage('user', userText);
+      input.value = '';
+
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'message ai';
+      loadingMsg.id = 'loading-message';
+      loadingMsg.innerHTML = `<span class="ai">Geykson:</span> <em>Typing...</em>`;
+      messagesDiv.appendChild(loadingMsg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      let messages;
+      if (currentMode === "translate") {
+        const prompt = `Turn the following Bisaya sentence to English with correct grammar. Don't put any explanation please:\n\n"${userText}"`;
+        messages = [ { role: "user", parts: [ { text: prompt } ] } ];
+      } else if (currentMode === "letter") {
+        const prompt = `Turn this Bisaya input into English in a letter format:\n\n"${userText}"`;
+        messages = [ { role: "user", parts: [ { text: prompt } ] } ];
+      } else {
+        chatHistory.push({ role: "user", parts: [ { text: userText } ] });
+        messages = [...chatHistory];
+        const totalTokens = JSON.stringify(messages).length;
+        if (totalTokens > 7000) {
+          appendMessage('ai', "⚠️ Memory full! Please click the Refresh button to reset the conversation.");
+          return;
+        }
+      }
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBG9CeTRKJZA5fzcxdfzno5WaJPacW7bTA`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: messages })
+        });
+
+        const data = await res.json();
+        const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
+        document.getElementById('loading-message')?.remove();
+        appendMessage('ai', aiText);
+
+        if (currentMode === 'ask') {
+          chatHistory.push({ role: "model", parts: [ { text: aiText } ] });
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loading-message')?.remove();
+        appendMessage('ai', "⚠️ Error connecting to Geykson.");
+      }
+    }
+
+//   window.addEventListener('beforeunload', function () {
+//   if (conversationLog.length > 0) {
+//     const timestamp = new Date().toLocaleString();
+//     const logData = `--- Chat @ ${timestamp} ---\n` + conversationLog.join("\n") + "\n\n";
+//     const blob = new Blob([logData], { type: 'text/plain' });
+//     navigator.sendBeacon('/save-chat', blob);
+//   }
+// });
+
+  </script>
+</body>
+</html>
