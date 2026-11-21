@@ -13,7 +13,7 @@ function getModelCandidates() {
   if (process.env.AI_Model && process.env.AI_Model.trim()) {
     candidates.push(process.env.AI_Model.trim().replace(/^models\//, ''));
   }
-  const defaults = ['gemini-3.5-flash-lite', 'gemini-3-flash-preview'];
+  const defaults = ['gemini-3.5-flash', 'gemini-3-flash-preview'];
   for (const m of defaults) {
     if (!candidates.includes(m)) candidates.push(m);
   }
