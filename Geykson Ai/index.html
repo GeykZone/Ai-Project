@@ -906,7 +906,7 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
           "Sorry, I couldn't generate a response.";
 
         if (candidate?.finishReason === "MAX_TOKENS") {
-          aiText += "\n\n*(Cut off due to length limit — try asking to continue!)*";
+          aiText += "\n\n*(Cut off due to length limit — try saying continue please!)*";
         }
 
         appendMessage('ai', aiText);
