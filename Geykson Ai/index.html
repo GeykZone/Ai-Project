@@ -2,143 +2,496 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Talk With Geykson AI</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🤖</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: sans-serif;
-      background-color: #121212;
-      color: #f1f1f1;
+    :root {
+      --bg-outer: #090d16;
+      --bg-card: #111827;
+      --bg-elevated: #1f2937;
+      --bg-chat: #0d1320;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #3b82f6;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
+      --accent-green: #10b981;
+      --bubble-user: linear-gradient(135deg, #2563eb, #1d4ed8);
+      --bubble-ai: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #172033 0%, var(--bg-outer) 65%);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
     .chat-box {
-      max-width: 600px;
-      margin: auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 720px;
+      height: min(860px, 100%);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-    h2 {
+
+    /* Header */
+    .chat-header {
+      padding: 16px 20px;
+      background: rgba(17, 24, 39, 0.9);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .brand-info {
+      min-width: 0;
+    }
+
+    .brand-info h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .refresh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .refresh-btn:hover {
+      background: #2b3749;
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .refresh-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Mode Selector */
+    .mode-bar {
+      padding: 12px 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .mode-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: var(--bg-chat);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .mode-buttons button {
+      padding: 9px 10px;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 500;
+      line-height: 1.25;
+      transition: all 0.2s ease;
+    }
+
+    .mode-buttons button:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .mode-buttons button.active {
+      background: var(--accent-green);
+      color: #052e16;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Messages Area */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: var(--bg-chat);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+
+    #messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+    }
+
+    .empty-state {
+      margin: auto;
       text-align: center;
-      color: #f1f1f1;
+      color: var(--text-secondary);
+      max-width: 320px;
+      padding: 20px;
+    }
+
+    .empty-state .emoji {
+      font-size: 36px;
       margin-bottom: 10px;
     }
-    .top-buttons, .mode-buttons {
+
+    .empty-state p {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message-row {
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      flex-direction: column;
+      max-width: 82%;
+      animation: fadeSlideIn 0.2s ease-out;
     }
-    .mode-buttons {
-      justify-content: space-around;
+
+    .message-row.user {
+      align-self: flex-end;
+      align-items: flex-end;
     }
-    .refresh-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
+
+    .message-row.ai {
+      align-self: flex-start;
+      align-items: flex-start;
     }
-    .refresh-btn {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      cursor: pointer;
+
+    .message-meta {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      padding: 0 4px;
     }
-    .mode-buttons button, .top-buttons button {
-      margin: 5px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #3c3c3c;
-      color: #f1f1f1;
-      transition: background 0.3s;
-    }
-    .mode-buttons button.active {
-      background: #4CAF50;
-    }
-    #messages {
-      margin-top: 20px;
-      height: 300px;
-      overflow-y: auto;
-      border: 1px solid #333;
-      padding: 10px;
-      border-radius: 8px;
-      background-color: #333;
+
+    .message-bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14.5px;
+      line-height: 1.55;
+      word-break: break-word;
       white-space: pre-wrap;
     }
-    .message {
-      margin: 10px 0;
+
+    .message-row.user .message-bubble {
+      background: var(--bubble-user);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
     }
-    .user {
-      font-weight: bold;
-      color: #1a73e8;
+
+    .message-row.ai .message-bubble {
+      background: var(--bubble-ai);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-bottom-left-radius: 4px;
     }
-    .ai {
-      color: #FFFFFF;
+
+    /* Typing Dots */
+    .typing-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 2px;
     }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: 1px solid #555;
-      background-color: #2a2a2a;
-      color: #f1f1f1;
+
+    .typing-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      animation: bounce 1.2s infinite ease-in-out;
     }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.75); opacity: 0.45; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Input Bar */
+    .input-wrapper {
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
     .input-container {
       display: flex;
-      justify-content: space-evenly;
-      margin-top: 10px;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 6px 6px 6px 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+
+    .input-container:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 15px;
+      padding: 8px 0;
+      outline: none;
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
     button.send-btn {
-      padding: 10px 20px;
-      margin-left: 10px;
-      border-radius: 8px;
-      background-color: #1a73e8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      background: var(--accent-blue);
       color: white;
       border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
       flex-shrink: 0;
-      align-self: self-end;
-      margin-bottom: 2px;
+      transition: background 0.2s ease, transform 0.1s ease;
     }
-    @media (max-width: 768px) {
+
+    button.send-btn:hover {
+      background: var(--accent-blue-hover);
+    }
+
+    button.send-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Mobile & Small Screens */
+    @media (max-width: 640px) {
+      body {
+        padding: 0;
+      }
+
+      .chat-box {
+        height: 100dvh;
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+      }
+
+      .chat-header {
+        padding: 12px 14px;
+      }
+
+      .brand-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+
+      .brand-info h2 {
+        font-size: 15px;
+      }
+
+      .refresh-btn {
+        padding: 7px 11px;
+        font-size: 12px;
+      }
+
+      .mode-bar {
+        padding: 8px 12px;
+      }
+
       .mode-buttons {
-        flex-direction: column;
-        align-items: center;
+        gap: 4px;
+        padding: 4px;
       }
-      .input-container {
-        flex-direction: column;
-        align-items: stretch;
+
+      .mode-buttons button {
+        padding: 8px 6px;
+        font-size: 11px;
       }
-      input[type="text"] {
-        margin-bottom: 10px;
+
+      #messages {
+        padding: 14px;
+        gap: 12px;
       }
+
+      .message-row {
+        max-width: 88%;
+      }
+
+      .message-bubble {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+
+      .input-wrapper {
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      }
+
       button.send-btn {
-        width: 100%;
+        padding: 10px 14px;
       }
     }
   </style>
 </head>
 <body>
   <div class="chat-box">
-    <h2>Geykson Maravillas AI 🤖</h2>
-    <div class="refresh-container">
-      <button class="refresh-btn" onclick="manualRefresh()">🔄 Refresh</button>
+    <div class="chat-header">
+      <div class="brand">
+        <div class="brand-avatar">🤖</div>
+        <div class="brand-info">
+          <h2>Geykson Maravillas AI</h2>
+          <div class="status-line">
+            <span class="status-dot"></span>
+            <span id="mode-subtitle">Bisaya &amp; English Assistant</span>
+          </div>
+        </div>
+      </div>
+      <button class="refresh-btn" onclick="manualRefresh()" title="Reset conversation">
+        <span>🔄</span>
+        <span>Refresh</span>
+      </button>
     </div>
-    <div class="mode-buttons">
-      <button onclick="selectMode('translate')" id="btn-translate">Translate Bisaya ➞ English</button>
-      <button onclick="selectMode('letter')" id="btn-letter">Letter Format (Bisaya ➞ English)</button>
-      <button onclick="selectMode('ask')" id="btn-ask">Ask Anything</button>
+
+    <div class="mode-bar">
+      <div class="mode-buttons">
+        <button onclick="selectMode('translate')" id="btn-translate">Translate Bisaya ➞ English</button>
+        <button onclick="selectMode('letter')" id="btn-letter">Letter Format (Bisaya ➞ English)</button>
+        <button onclick="selectMode('ask')" id="btn-ask">Ask Anything</button>
+      </div>
     </div>
-    <div id="messages"></div>
-    <div class="input-container">
-      <input type="text" id="user-input" placeholder="Type your message..." />
-      <button onclick="sendMessage()" class="send-btn">Send</button>
+
+    <div id="messages">
+      <div class="empty-state" id="empty-state">
+        <div class="emoji">👋</div>
+        <p>Kumusta! Type a message below in Bisaya or English to start chatting.</p>
+      </div>
+    </div>
+
+    <div class="input-wrapper">
+      <div class="input-container">
+        <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
+        <button onclick="sendMessage()" class="send-btn">
+          <span>Send</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -175,17 +528,46 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
       document.querySelectorAll('.mode-buttons button').forEach(btn => btn.classList.remove('active'));
       const btn = document.getElementById('btn-' + currentMode);
       if (btn) btn.classList.add('active');
+
+      const subtitle = document.getElementById('mode-subtitle');
+      if (subtitle) {
+        const labels = {
+          translate: 'Mode: Bisaya ➞ English Translator',
+          letter: 'Mode: Formal English Letter',
+          ask: 'Mode: Ask Anything (Memory Active)'
+        };
+        subtitle.textContent = labels[currentMode] || 'Bisaya & English Assistant';
+      }
     }
 
     highlightActiveButton();
 
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
     function appendMessage(role, text) {
+      document.getElementById('empty-state')?.remove();
+
       const timestamp = new Date().toLocaleString();
-      const msg = document.createElement('div');
-      msg.className = 'message ' + role;
-      const formattedText = text.replace(/\n/g, '<br>').replace(/(?:^|\n)(\s+)/g, '<br>&nbsp;&nbsp;&nbsp;&nbsp;');
-      msg.innerHTML = `<span class="${role}">${role === 'user' ? 'You' : 'Geyk'}:</span> ${formattedText}`;
-      messagesDiv.appendChild(msg);
+      const shortTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const row = document.createElement('div');
+      row.className = 'message-row ' + role;
+
+      const formattedText = escapeHTML(text)
+        .replace(/\n/g, '<br>')
+        .replace(/(?:^|\n)(\s+)/g, '<br>&nbsp;&nbsp;&nbsp;&nbsp;');
+
+      row.innerHTML = `
+        <div class="message-meta">${role === 'user' ? 'You' : 'Geyk'} • ${shortTime}</div>
+        <div class="message-bubble">${formattedText}</div>
+      `;
+
+      messagesDiv.appendChild(row);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       const logEntry = `[${timestamp}] ${role === 'user' ? 'You' : 'Geyk'}: ${text}`;
@@ -198,8 +580,13 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
         body: logEntry + "\n"
       }).catch(console.error);
     }
-    
 
+    document.getElementById('user-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
 
     async function sendMessage() {
       const input = document.getElementById('user-input');
@@ -209,11 +596,16 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
       appendMessage('user', userText);
       input.value = '';
 
-      const loadingMsg = document.createElement('div');
-      loadingMsg.className = 'message ai';
-      loadingMsg.id = 'loading-message';
-      loadingMsg.innerHTML = `<span class="ai">Geykson:</span> <em>Typing...</em>`;
-      messagesDiv.appendChild(loadingMsg);
+      const loadingRow = document.createElement('div');
+      loadingRow.className = 'message-row ai';
+      loadingRow.id = 'loading-message';
+      loadingRow.innerHTML = `
+        <div class="message-meta">Geyk</div>
+        <div class="message-bubble">
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+        </div>
+      `;
+      messagesDiv.appendChild(loadingRow);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       let messagesToSend;
@@ -225,7 +617,6 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
         const prompt = `Turn this Bisaya input into English in a letter format:\n\n"${userText}"`;
         messagesToSend = [{ role: "user", parts: [{ text: prompt }] }];
       } else {
-        // Build next history without mutating chatHistory until the request succeeds
         const nextHistory = [
           ...chatHistory,
           { role: "user", parts: [{ text: userText }] }
@@ -268,7 +659,6 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
 
         appendMessage('ai', aiText);
 
-        // Save both user turn and model reply to chatHistory for future turns
         if (currentMode === 'ask') {
           chatHistory.push({ role: "user", parts: [{ text: userText }] });
           chatHistory.push({ role: "model", parts: [{ text: aiText }] });
@@ -279,16 +669,6 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
         appendMessage('ai', "⚠️ Error connecting to Geykson.");
       }
     }
-
-//   window.addEventListener('beforeunload', function () {
-//   if (conversationLog.length > 0) {
-//     const timestamp = new Date().toLocaleString();
-//     const logData = `--- Chat @ ${timestamp} ---\n` + conversationLog.join("\n") + "\n\n";
-//     const blob = new Blob([logData], { type: 'text/plain' });
-//     navigator.sendBeacon('/save-chat', blob);
-//   }
-// });
-
   </script>
 </body>
 </html>
