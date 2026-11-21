@@ -881,7 +881,13 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: messagesToSend })
+            body: JSON.stringify({
+              contents: messagesToSend,
+              generationConfig: {
+                maxOutputTokens: 1024,
+                temperature: 0.75
+              }
+            })
           }
         );
 
@@ -894,9 +900,14 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
           return;
         }
 
-        const aiText =
-          data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        const candidate = data?.candidates?.[0];
+        let aiText =
+          candidate?.content?.parts?.[0]?.text ||
           "Sorry, I couldn't generate a response.";
+
+        if (candidate?.finishReason === "MAX_TOKENS") {
+          aiText += "\n\n*(Cut off due to length limit — try asking to continue!)*";
+        }
 
         appendMessage('ai', aiText);
 
