@@ -10,6 +10,8 @@ app.use('/save-chat', express.text());
 
 app.post('/api/chat', async (req, res) => {
   const apiKey = process.env.AI_Key;
+  const model = (process.env.AI_Model || 'gemini-2.5-flash-lite').trim();
+
   if (!apiKey) {
     console.error('❌ Missing AI_Key environment variable');
     return res.status(500).json({ error: { message: 'Server AI_Key is not configured.' } });
@@ -22,7 +24,7 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
