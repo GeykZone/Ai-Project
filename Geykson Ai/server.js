@@ -21,11 +21,16 @@ function getModelCandidates() {
 }
 
 function shouldTryNextModel(status, data) {
-  if (status === 429) return true;
+  if (status === 429 || status === 503 || status === 500) return true;
   const msg = (data?.error?.message || '').toLowerCase();
   const codeStatus = (data?.error?.status || '').toUpperCase();
   return (
     codeStatus === 'RESOURCE_EXHAUSTED' ||
+    codeStatus === 'UNAVAILABLE' ||
+    msg.includes('high demand') ||
+    msg.includes('spikes in demand') ||
+    msg.includes('temporarily') ||
+    msg.includes('overloaded') ||
     msg.includes('quota') ||
     msg.includes('rate limit') ||
     msg.includes('token')
@@ -80,7 +85,7 @@ app.post('/api/chat', async (req, res) => {
         return res.status(geminiRes.status).json(data);
       }
 
-      console.warn(`⚠️ Model ${currentModel} hit limit (${geminiRes.status}), switching to ${models[i + 1]}...`);
+      console.warn(`⚠️ Model ${currentModel} unavailable/busy (${geminiRes.status}), switching to ${models[i + 1]}...`);
     }
 
     return res.status(lastStatus).json(lastData);
