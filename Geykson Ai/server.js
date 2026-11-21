@@ -8,9 +8,32 @@ app.use(express.static('.'));
 app.use(express.json({ limit: '1mb' }));
 app.use('/save-chat', express.text());
 
+function getModelCandidates() {
+  const candidates = [];
+  if (process.env.AI_Model && process.env.AI_Model.trim()) {
+    candidates.push(process.env.AI_Model.trim().replace(/^models\//, ''));
+  }
+  const defaults = ['gemini-3.5-flash-lite', 'gemini-3-flash-preview'];
+  for (const m of defaults) {
+    if (!candidates.includes(m)) candidates.push(m);
+  }
+  return candidates;
+}
+
+function shouldTryNextModel(status, data) {
+  if (status === 429) return true;
+  const msg = (data?.error?.message || '').toLowerCase();
+  const codeStatus = (data?.error?.status || '').toUpperCase();
+  return (
+    codeStatus === 'RESOURCE_EXHAUSTED' ||
+    msg.includes('quota') ||
+    msg.includes('rate limit') ||
+    msg.includes('token')
+  );
+}
+
 app.post('/api/chat', async (req, res) => {
   const apiKey = process.env.AI_Key;
-  const model = (process.env.AI_Model || 'gemini-2.5-flash-lite').trim();
 
   if (!apiKey) {
     console.error('❌ Missing AI_Key environment variable');
@@ -23,23 +46,44 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: { message: 'Invalid request contents.' } });
     }
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents,
-          generationConfig: generationConfig || {
-            maxOutputTokens: 1024,
-            temperature: 0.75
-          }
-        })
-      }
-    );
+    const models = getModelCandidates();
+    let lastData = null;
+    let lastStatus = 500;
 
-    const data = await geminiRes.json();
-    return res.status(geminiRes.status).json(data);
+    for (let i = 0; i < models.length; i++) {
+      const currentModel = models[i];
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(currentModel)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents,
+            generationConfig: generationConfig || {
+              maxOutputTokens: 1024,
+              temperature: 0.75
+            }
+          })
+        }
+      );
+
+      const data = await geminiRes.json();
+      lastData = data;
+      lastStatus = geminiRes.status;
+
+      if (geminiRes.ok) {
+        return res.status(200).json(data);
+      }
+
+      const hasMore = i < models.length - 1;
+      if (!hasMore || !shouldTryNextModel(geminiRes.status, data)) {
+        return res.status(geminiRes.status).json(data);
+      }
+
+      console.warn(`⚠️ Model ${currentModel} hit limit (${geminiRes.status}), switching to ${models[i + 1]}...`);
+    }
+
+    return res.status(lastStatus).json(lastData);
   } catch (err) {
     console.error('❌ Gemini proxy error:', err);
     return res.status(500).json({ error: { message: 'Failed to reach Gemini API.' } });
