@@ -409,7 +409,7 @@
       border-bottom-left-radius: 5px;
     }
 
-    /* Compact Typing Bubble (Fix for oversized loading box) */
+    /* Compact Typing Bubble */
     .message-bubble.typing-bubble {
       white-space: normal;
       padding: 12px 16px;
@@ -635,14 +635,10 @@
 
     <div id="messages">
       <div class="empty-state" id="empty-state">
-        <div class="empty-icon">🤖</div>
-        <h3>Kumusta! I'm Geyk AI</h3>
-        <p>Ask anything, translate Bisaya to English, or draft a formal letter in seconds.</p>
-        <div class="quick-chips">
-          <button class="chip-btn" onclick="useQuickPrompt('Kumusta ka bay?')">Kumusta ka bay?</button>
-          <button class="chip-btn" onclick="useQuickPrompt('Who built you?')">Who built you?</button>
-          <button class="chip-btn" onclick="useQuickPrompt('Translate: Asa ka paingon karon?')">Translate Bisaya</button>
-        </div>
+        <div class="empty-icon" id="empty-icon">🤖</div>
+        <h3 id="empty-title">Kumusta! I'm Geyk AI</h3>
+        <p id="empty-desc">Ask anything, translate Bisaya to English, or draft a formal letter in seconds.</p>
+        <div class="quick-chips" id="quick-chips"></div>
       </div>
     </div>
 
@@ -690,6 +686,43 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
       { role: "user", parts: [ { text: systemPrompt } ] }
     ];
 
+    const modeConfigs = {
+      translate: {
+        subtitle: 'Bisaya ➞ English Translator',
+        icon: '🌐',
+        title: 'Bisaya ➞ English Translator',
+        desc: 'Type any Bisaya word, phrase, or sentence below to get a clean English translation.',
+        placeholder: 'Enter Bisaya text to translate...',
+        chips: [
+          { label: 'Asa ka paingon karon?', prompt: 'Asa ka paingon karon?' },
+          { label: 'Daghang salamat sa imong tabang.', prompt: 'Daghang salamat sa imong tabang.' }
+        ]
+      },
+      letter: {
+        subtitle: 'Formal English Letter',
+        icon: '✉️',
+        title: 'Bisaya ➞ Formal English Letter',
+        desc: 'Write your message in Bisaya and I will turn it into a well-structured English letter.',
+        placeholder: 'Write your message in Bisaya...',
+        chips: [
+          { label: 'Excused absence letter', prompt: 'Maayong adlaw, mangayo unta ko og pasaylo kay dili ko makasulod karon tungod kay naglain akong pamati.' },
+          { label: 'Follow-up message', prompt: 'Maayong buntag, mangutana lang unta ko og naa na bay update sa akong gipasa nga dokumento.' }
+        ]
+      },
+      ask: {
+        subtitle: 'Ask Anything • Memory Active',
+        icon: '🤖',
+        title: "Kumusta! I'm Geyk AI",
+        desc: 'Chat casually in Bisaya or English, or ask anything you want to know.',
+        placeholder: 'Type your message...',
+        chips: [
+          { label: 'Kumusta ka bay?', prompt: 'Kumusta ka bay?' },
+          { label: 'Who built you?', prompt: 'Who built you?' },
+          { label: "What are Geykson's hobbies?", prompt: "What are Geykson's hobbies?" }
+        ]
+      }
+    };
+
     function manualRefresh() {
       localStorage.removeItem('mode');
       location.reload();
@@ -705,14 +738,30 @@ Always respond casually and naturally — like a close Bisaya-English speaking f
       const btn = document.getElementById('btn-' + currentMode);
       if (btn) btn.classList.add('active');
 
+      const config = modeConfigs[currentMode] || modeConfigs.ask;
+
       const subtitle = document.getElementById('mode-subtitle');
-      if (subtitle) {
-        const labels = {
-          translate: 'Bisaya ➞ English Translator',
-          letter: 'Formal English Letter',
-          ask: 'Ask Anything • Memory Active'
-        };
-        subtitle.textContent = labels[currentMode] || 'Bisaya & English Assistant';
+      if (subtitle) subtitle.textContent = config.subtitle;
+
+      const emptyIcon = document.getElementById('empty-icon');
+      const emptyTitle = document.getElementById('empty-title');
+      const emptyDesc = document.getElementById('empty-desc');
+      const chipsContainer = document.getElementById('quick-chips');
+
+      if (emptyIcon) emptyIcon.textContent = config.icon;
+      if (emptyTitle) emptyTitle.textContent = config.title;
+      if (emptyDesc) emptyDesc.textContent = config.desc;
+      if (userInput) userInput.placeholder = config.placeholder;
+
+      if (chipsContainer) {
+        chipsContainer.innerHTML = '';
+        config.chips.forEach(chip => {
+          const button = document.createElement('button');
+          button.className = 'chip-btn';
+          button.textContent = chip.label;
+          button.onclick = () => useQuickPrompt(chip.prompt);
+          chipsContainer.appendChild(button);
+        });
       }
     }
 
