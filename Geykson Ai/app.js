@@ -97,7 +97,7 @@ function spawnHeart(burst = false) {
 
   const left = Math.random() * 96 + 2;
   const size = burst ? (Math.random() * 14 + 18) : (Math.random() * 12 + 14);
-  const dur = burst ? (Math.random() * 1.4 + 2.2) : (Math.random() * 1.6 + 2.6);
+  const dur = burst ? (Math.random() * 1.6 + 2.6) : (Math.random() * 2.0 + 3.2);
   const sway = (Math.random() * 44 - 22).toFixed(1) + 'px';
   const maxOpacity = (Math.random() * 0.25 + 0.7).toFixed(2);
 
@@ -150,19 +150,19 @@ function activateJessaLoveMode() {
   const subtitle = document.getElementById('mode-subtitle');
   if (subtitle) subtitle.textContent = 'Jessa Mode • Sweet & Romantic';
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 12; i++) {
     setTimeout(() => {
       if (jessaLoveActive) spawnHeart(true);
-    }, i * 90);
+    }, i * 100);
   }
 
   heartSpawnInterval = setInterval(() => {
     if (jessaLoveActive) spawnHeart(false);
-  }, 450);
+  }, 550);
 
   jessaLoveTimeout = setTimeout(() => {
     stopJessaLoveMode();
-  }, 5000);
+  }, 15000);
 }
 
 function processLoveMarker(rawText, userText) {
