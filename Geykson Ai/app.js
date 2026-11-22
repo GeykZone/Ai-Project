@@ -4,6 +4,7 @@ let currentMode = localStorage.getItem('mode') || 'ask';
 const conversationLog = [];
 let jessaLoveActive = false;
 let heartSpawnInterval = null;
+let jessaLoveTimeout = null;
 
 const systemPrompt = `You are Geykson AI, a helpful and friendly assistant created by Geykson Maravillas.
 You fluently understand and speak both Bisaya and English, and can translate or switch between the two when requested — but never add translations unless the user asks.
@@ -96,7 +97,7 @@ function spawnHeart(burst = false) {
 
   const left = Math.random() * 96 + 2;
   const size = burst ? (Math.random() * 14 + 18) : (Math.random() * 12 + 14);
-  const dur = burst ? (Math.random() * 2.2 + 3.2) : (Math.random() * 3.0 + 4.8);
+  const dur = burst ? (Math.random() * 1.4 + 2.2) : (Math.random() * 1.6 + 2.6);
   const sway = (Math.random() * 44 - 22).toFixed(1) + 'px';
   const maxOpacity = (Math.random() * 0.25 + 0.7).toFixed(2);
 
@@ -107,28 +108,61 @@ function spawnHeart(burst = false) {
   heart.style.setProperty('--max-opacity', maxOpacity);
 
   layer.appendChild(heart);
-  setTimeout(() => heart.remove(), (dur + 0.4) * 1000);
+  setTimeout(() => heart.remove(), (dur + 0.3) * 1000);
+}
+
+function stopJessaLoveMode() {
+  jessaLoveActive = false;
+  if (heartSpawnInterval) {
+    clearInterval(heartSpawnInterval);
+    heartSpawnInterval = null;
+  }
+  if (jessaLoveTimeout) {
+    clearTimeout(jessaLoveTimeout);
+    jessaLoveTimeout = null;
+  }
+  document.body.classList.remove('jessa-love-mode');
+
+  const brandAvatar = document.querySelector('.brand-avatar');
+  if (brandAvatar) brandAvatar.textContent = '🤖';
+
+  const config = modeConfigs[currentMode] || modeConfigs.ask;
+  const subtitle = document.getElementById('mode-subtitle');
+  if (subtitle) subtitle.textContent = config.subtitle;
 }
 
 function activateJessaLoveMode() {
+  if (heartSpawnInterval) {
+    clearInterval(heartSpawnInterval);
+    heartSpawnInterval = null;
+  }
+  if (jessaLoveTimeout) {
+    clearTimeout(jessaLoveTimeout);
+    jessaLoveTimeout = null;
+  }
+
+  jessaLoveActive = true;
   document.body.classList.add('jessa-love-mode');
 
   const brandAvatar = document.querySelector('.brand-avatar');
   if (brandAvatar) brandAvatar.textContent = '💖';
 
   const subtitle = document.getElementById('mode-subtitle');
-  if (subtitle && !subtitle.textContent.includes('💖')) {
-    subtitle.textContent = 'Jessa Mode • Sweet & Romantic';
+  if (subtitle) subtitle.textContent = 'Jessa Mode • Sweet & Romantic';
+
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      if (jessaLoveActive) spawnHeart(true);
+    }, i * 90);
   }
 
-  for (let i = 0; i < 14; i++) {
-    setTimeout(() => spawnHeart(true), i * 110);
-  }
+  heartSpawnInterval = setInterval(() => {
+    if (jessaLoveActive) spawnHeart(false);
+  }, 450);
 
-  if (!jessaLoveActive) {
-    jessaLoveActive = true;
-    heartSpawnInterval = setInterval(() => spawnHeart(false), 950);
-  }
+  jessaLoveTimeout = setTimeout(() => {
+    stopJessaLoveMode();
+  }, 5000);
 }
 
 function processLoveMarker(rawText, userText) {
