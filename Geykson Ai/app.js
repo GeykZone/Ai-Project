@@ -145,7 +145,7 @@ function startFloatingStickersFor15Seconds() {
 
   floatingStickersTimeout = setTimeout(() => {
     clearFloatingStickers();
-  }, 15000);
+  }, 5000);
 }
 
 function activateJessaLoveMode() {
