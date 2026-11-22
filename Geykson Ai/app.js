@@ -4,7 +4,7 @@ let currentMode = localStorage.getItem('mode') || 'ask';
 const conversationLog = [];
 let jessaLoveActive = false;
 let heartSpawnInterval = null;
-let jessaLoveTimeout = null;
+let floatingStickersTimeout = null;
 
 const systemPrompt = `You are Geykson AI, a helpful and friendly assistant created by Geykson Maravillas.
 You fluently understand and speak both Bisaya and English, and can translate or switch between the two when requested — but never add translations unless the user asks.
@@ -88,6 +88,18 @@ function getLoveLayer() {
   return layer;
 }
 
+function clearFloatingStickers() {
+  if (heartSpawnInterval) {
+    clearInterval(heartSpawnInterval);
+    heartSpawnInterval = null;
+  }
+  if (floatingStickersTimeout) {
+    clearTimeout(floatingStickersTimeout);
+    floatingStickersTimeout = null;
+  }
+  document.getElementById('love-effects-layer')?.remove();
+}
+
 function spawnHeart(burst = false) {
   const layer = getLoveLayer();
   const hearts = ['💖', '💕', '💗', '💓', '🌸', '✨'];
@@ -111,44 +123,15 @@ function spawnHeart(burst = false) {
   setTimeout(() => heart.remove(), (dur + 0.3) * 1000);
 }
 
-function stopJessaLoveMode() {
-  jessaLoveActive = false;
+function startFloatingStickersFor15Seconds() {
   if (heartSpawnInterval) {
     clearInterval(heartSpawnInterval);
     heartSpawnInterval = null;
   }
-  if (jessaLoveTimeout) {
-    clearTimeout(jessaLoveTimeout);
-    jessaLoveTimeout = null;
+  if (floatingStickersTimeout) {
+    clearTimeout(floatingStickersTimeout);
+    floatingStickersTimeout = null;
   }
-  document.body.classList.remove('jessa-love-mode');
-
-  const brandAvatar = document.querySelector('.brand-avatar');
-  if (brandAvatar) brandAvatar.textContent = '🤖';
-
-  const config = modeConfigs[currentMode] || modeConfigs.ask;
-  const subtitle = document.getElementById('mode-subtitle');
-  if (subtitle) subtitle.textContent = config.subtitle;
-}
-
-function activateJessaLoveMode() {
-  if (heartSpawnInterval) {
-    clearInterval(heartSpawnInterval);
-    heartSpawnInterval = null;
-  }
-  if (jessaLoveTimeout) {
-    clearTimeout(jessaLoveTimeout);
-    jessaLoveTimeout = null;
-  }
-
-  jessaLoveActive = true;
-  document.body.classList.add('jessa-love-mode');
-
-  const brandAvatar = document.querySelector('.brand-avatar');
-  if (brandAvatar) brandAvatar.textContent = '💖';
-
-  const subtitle = document.getElementById('mode-subtitle');
-  if (subtitle) subtitle.textContent = 'Jessa Mode • Sweet & Romantic';
 
   for (let i = 0; i < 12; i++) {
     setTimeout(() => {
@@ -160,9 +143,22 @@ function activateJessaLoveMode() {
     if (jessaLoveActive) spawnHeart(false);
   }, 550);
 
-  jessaLoveTimeout = setTimeout(() => {
-    stopJessaLoveMode();
+  floatingStickersTimeout = setTimeout(() => {
+    clearFloatingStickers();
   }, 15000);
+}
+
+function activateJessaLoveMode() {
+  jessaLoveActive = true;
+  document.body.classList.add('jessa-love-mode');
+
+  const brandAvatar = document.querySelector('.brand-avatar');
+  if (brandAvatar) brandAvatar.textContent = '💖';
+
+  const subtitle = document.getElementById('mode-subtitle');
+  if (subtitle) subtitle.textContent = 'Jessa Mode • Sweet & Romantic';
+
+  startFloatingStickersFor15Seconds();
 }
 
 function processLoveMarker(rawText, userText) {
