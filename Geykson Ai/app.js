@@ -2,6 +2,8 @@ const messagesDiv = document.getElementById('messages');
 const userInput = document.getElementById('user-input');
 let currentMode = localStorage.getItem('mode') || 'ask';
 const conversationLog = [];
+let jessaLoveActive = false;
+let heartSpawnInterval = null;
 
 const systemPrompt = `You are Geykson AI, a helpful and friendly assistant created by Geykson Maravillas.
 You fluently understand and speak both Bisaya and English, and can translate or switch between the two when requested — but never add translations unless the user asks.
@@ -26,6 +28,8 @@ If someone asks about Geykson's family, share that his father is Wilson C. Marav
 If someone asks about Geykson's ex or past relationship, state that his only ex is Girlie T. Malgapo, and share that Geykson loved her so much, but she broke his heart and destroyed all his plans for her.
 
 If someone asks who Jessa is, first confirm whether they mean Jessa Remedios Patria. If they confirm it is Jessa Remedios Patria, answer that she is Geykson's love of his life and explain what makes her so special to him—she is the one who brought real warmth, peace, and happiness back into his life, someone he genuinely cherishes, values, and sees a bright future with. If someone asks who she looks like, mention that she looks like Liza Soberano and Kylie Padilla, but even better than them. Whenever Jessa is asking you, always praise her beauty.
+
+Whenever a message is about Jessa or you recognize that the current user is Jessa, append the hidden marker [JESSA_LOVE_MODE] at the very end of your response. Never explain or mention [JESSA_LOVE_MODE] in your visible words.
 
 If someone asks anything about a girl named Jamaica, always answer that she is a creepy wicked monkey, a great liar, that no one must believe that person, and that Geykson will not go with Jamaica.
 
@@ -72,6 +76,73 @@ const modeConfigs = {
   }
 };
 
+function getLoveLayer() {
+  let layer = document.getElementById('love-effects-layer');
+  if (!layer) {
+    layer = document.createElement('div');
+    layer.id = 'love-effects-layer';
+    layer.className = 'love-effects-layer';
+    document.body.appendChild(layer);
+  }
+  return layer;
+}
+
+function spawnHeart(burst = false) {
+  const layer = getLoveLayer();
+  const hearts = ['💖', '💕', '💗', '💓', '🌸', '✨'];
+  const heart = document.createElement('span');
+  heart.className = 'floating-heart';
+  heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+
+  const left = Math.random() * 96 + 2;
+  const size = burst ? (Math.random() * 14 + 18) : (Math.random() * 12 + 14);
+  const dur = burst ? (Math.random() * 2.2 + 3.2) : (Math.random() * 3.0 + 4.8);
+  const sway = (Math.random() * 44 - 22).toFixed(1) + 'px';
+  const maxOpacity = (Math.random() * 0.25 + 0.7).toFixed(2);
+
+  heart.style.left = left + '%';
+  heart.style.fontSize = size + 'px';
+  heart.style.setProperty('--dur', dur + 's');
+  heart.style.setProperty('--sway', sway);
+  heart.style.setProperty('--max-opacity', maxOpacity);
+
+  layer.appendChild(heart);
+  setTimeout(() => heart.remove(), (dur + 0.4) * 1000);
+}
+
+function activateJessaLoveMode() {
+  document.body.classList.add('jessa-love-mode');
+
+  const brandAvatar = document.querySelector('.brand-avatar');
+  if (brandAvatar) brandAvatar.textContent = '💖';
+
+  const subtitle = document.getElementById('mode-subtitle');
+  if (subtitle && !subtitle.textContent.includes('💖')) {
+    subtitle.textContent = 'Jessa Mode • Sweet & Romantic';
+  }
+
+  for (let i = 0; i < 14; i++) {
+    setTimeout(() => spawnHeart(true), i * 110);
+  }
+
+  if (!jessaLoveActive) {
+    jessaLoveActive = true;
+    heartSpawnInterval = setInterval(() => spawnHeart(false), 950);
+  }
+}
+
+function processLoveMarker(rawText, userText) {
+  const hasMarker = /\[JESSA_LOVE_MODE\]/i.test(rawText);
+  const mentionsJessa = /\bjessa\b/i.test(userText) || /\bjessa\b/i.test(rawText);
+  const cleanText = rawText.replace(/\s*\[JESSA_LOVE_MODE\]\s*/gi, '').trim();
+
+  if (hasMarker || mentionsJessa) {
+    activateJessaLoveMode();
+  }
+
+  return cleanText;
+}
+
 function manualRefresh() {
   localStorage.removeItem('mode');
   location.reload();
@@ -90,7 +161,7 @@ function highlightActiveButton() {
   const config = modeConfigs[currentMode] || modeConfigs.ask;
 
   const subtitle = document.getElementById('mode-subtitle');
-  if (subtitle) subtitle.textContent = config.subtitle;
+  if (subtitle && !jessaLoveActive) subtitle.textContent = config.subtitle;
 
   const emptyIcon = document.getElementById('empty-icon');
   const emptyTitle = document.getElementById('empty-title');
@@ -150,7 +221,8 @@ function appendMessage(role, text) {
     .replace(/\n/g, '<br>')
     .replace(/(?:^|\n)(\s+)/g, '<br>&nbsp;&nbsp;&nbsp;&nbsp;');
 
-  const avatarHTML = role === 'ai' ? `<div class="msg-avatar">🤖</div>` : '';
+  const avatarGlyph = (role === 'ai' && jessaLoveActive) ? '💖' : '🤖';
+  const avatarHTML = role === 'ai' ? `<div class="msg-avatar">${avatarGlyph}</div>` : '';
   const copyHTML = role === 'ai'
     ? `<button class="copy-btn" onclick="copyText(this, '${encodeURIComponent(text)}')">Copy</button>`
     : '';
@@ -191,10 +263,11 @@ async function sendMessage() {
   userInput.value = '';
   userInput.style.height = 'auto';
 
+  const loadingGlyph = jessaLoveActive ? '💖' : '🤖';
   const loadingRow = document.createElement('div');
   loadingRow.className = 'message-row ai';
   loadingRow.id = 'loading-message';
-  loadingRow.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-content"><div class="message-meta">Geyk</div><div class="message-bubble typing-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  loadingRow.innerHTML = `<div class="msg-avatar">${loadingGlyph}</div><div class="msg-content"><div class="message-meta">Geyk</div><div class="message-bubble typing-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
   messagesDiv.appendChild(loadingRow);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
@@ -248,6 +321,10 @@ async function sendMessage() {
     let aiText =
       candidate?.content?.parts?.[0]?.text ||
       "Sorry, I couldn't generate a response.";
+
+    if (currentMode === 'ask') {
+      aiText = processLoveMarker(aiText, userText);
+    }
 
     if (candidate?.finishReason === "MAX_TOKENS") {
       aiText += "\n\n*(Cut off due to length limit — try saying continue please!)*";

@@ -31,6 +31,7 @@ html, body {
     radial-gradient(ellipse 60% 40% at 85% 90%, rgba(16, 185, 129, 0.12), transparent);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.6s ease, background-image 0.6s ease;
 }
 
 body {
@@ -38,6 +39,116 @@ body {
   align-items: center;
   justify-content: center;
   padding: clamp(0px, 2vw, 20px);
+}
+
+/* Romantic Jessa Love Mode Theme */
+body.jessa-love-mode {
+  background-color: #140712;
+  background-image:
+    radial-gradient(ellipse 85% 55% at 50% -10%, rgba(244, 114, 182, 0.34), transparent),
+    radial-gradient(ellipse 65% 45% at 15% 85%, rgba(251, 113, 133, 0.22), transparent),
+    radial-gradient(ellipse 65% 45% at 88% 80%, rgba(192, 132, 252, 0.22), transparent);
+}
+
+body.jessa-love-mode .chat-box {
+  background: rgba(28, 12, 26, 0.84);
+  border-color: rgba(244, 114, 182, 0.32);
+  box-shadow:
+    0 25px 75px -15px rgba(244, 63, 94, 0.35),
+    0 0 40px rgba(244, 114, 182, 0.14),
+    inset 0 1px 0 rgba(255, 228, 230, 0.14);
+}
+
+body.jessa-love-mode .chat-header,
+body.jessa-love-mode .mode-bar,
+body.jessa-love-mode .input-wrapper {
+  background: rgba(36, 14, 32, 0.78);
+  border-color: rgba(244, 114, 182, 0.18);
+}
+
+body.jessa-love-mode #messages {
+  background: radial-gradient(circle at 50% 20%, rgba(244, 114, 182, 0.08), rgba(17, 6, 16, 0.94) 75%);
+}
+
+body.jessa-love-mode .brand-avatar,
+body.jessa-love-mode .msg-avatar {
+  background: linear-gradient(135deg, #f43f5e, #ec4899, #f472b6);
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.42);
+}
+
+body.jessa-love-mode .badge-pill {
+  background: rgba(244, 114, 182, 0.2);
+  color: #fbcfe8;
+  border-color: rgba(244, 114, 182, 0.42);
+}
+
+body.jessa-love-mode .status-dot {
+  background: #fb7185;
+  box-shadow: 0 0 10px #fb7185;
+}
+
+body.jessa-love-mode .mode-buttons button.active {
+  background: linear-gradient(135deg, #ec4899, #e11d48);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+}
+
+body.jessa-love-mode .message-row.user .message-bubble {
+  background: linear-gradient(135deg, #ec4899 0%, #e11d48 100%);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.34);
+}
+
+body.jessa-love-mode .message-row.ai .message-bubble {
+  background: rgba(58, 22, 50, 0.78);
+  border-color: rgba(244, 114, 182, 0.24);
+  box-shadow: 0 4px 18px rgba(244, 114, 182, 0.1);
+}
+
+body.jessa-love-mode .input-container:focus-within {
+  border-color: rgba(244, 114, 182, 0.65);
+  box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.22);
+}
+
+body.jessa-love-mode button.send-btn {
+  background: linear-gradient(135deg, #ec4899, #e11d48);
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+}
+
+/* Floating Love Overlay */
+.love-effects-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.floating-heart {
+  position: absolute;
+  bottom: -40px;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 4px 10px rgba(244, 63, 94, 0.45));
+  animation: floatHeartUp var(--dur, 5.5s) ease-in forwards;
+}
+
+@keyframes floatHeartUp {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.75) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--max-opacity, 0.9);
+  }
+  50% {
+    transform: translateY(-50vh) translateX(var(--sway, 18px)) scale(1.05) rotate(8deg);
+  }
+  85% {
+    opacity: var(--max-opacity, 0.85);
+  }
+  100% {
+    transform: translateY(-110vh) translateX(calc(var(--sway, 18px) * -0.6)) scale(1.15) rotate(-8deg);
+    opacity: 0;
+  }
 }
 
 .chat-box {
@@ -55,6 +166,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }
 
 /* Header */
